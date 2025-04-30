@@ -19,8 +19,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/produto', include('api_product.urls'), name='api_rest_urls'),
-    path('api/usuario', include('api_product.urls'), name='api_rest_urls'),
-    path('api/token', include('api_product.urls'), name='api_rest_urls'),
-    path('api/consulta', include('api_product.urls'), name='api_rest_urls')
+    path('api/produto/', include('apps.api_product.urls'), name='api_rest_urls'),
+    path('api/usuario', include('apps.api_product.urls'), name='api_rest_urls'),
+    path('api/token', include('apps.api_product.urls'), name='api_rest_urls'),
+    path('api/consulta', include('apps.api_product.urls'), name='api_rest_urls')
 ]

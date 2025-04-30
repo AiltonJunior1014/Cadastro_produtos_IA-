@@ -42,10 +42,11 @@ class Produto():
 
     
     def __str__(self):
-        return '{ "'"name"'": "'"Nome do Produto"'", "'"shortDescription"'": "Descrição curta", "description": "Descrição completa", "price": 106.39,
-                "promotionalPrice": 0.0,"packagingQuantity": 1.0,"stock": 57.0,"stockFake": 1000,"minimumStock": 0.0,"unit": "PC","weight": 0.0,"height": 0.0,"width": 0.0,
-                "length": 0.0,"brand": "teste","modifield": "2019-07-23 00:00:00","status": true,"ean": null,"partCode": "0024","ncm": "84834090","crossDocking": 0.0,"video": null,
-                "images": null,"categories": [{"codeCategory":"20"}],"type": 2,"items": [] }"
+        return '1'
+        # return '{ "'"name"'": "'"Nome do Produto"'", "'"shortDescription"'": "Descrição curta", "description": "Descrição completa", "price": 106.39,
+        #         "promotionalPrice": 0.0,"packagingQuantity": 1.0,"stock": 57.0,"stockFake": 1000,"minimumStock": 0.0,"unit": "PC","weight": 0.0,"height": 0.0,"width": 0.0,
+        #         "length": 0.0,"brand": "teste","modifield": "2019-07-23 00:00:00","status": true,"ean": null,"partCode": "0024","ncm": "84834090","crossDocking": 0.0,"video": null,
+        #         "images": null,"categories": [{"codeCategory":"20"}],"type": 2,"items": [] }"
 
 
     
