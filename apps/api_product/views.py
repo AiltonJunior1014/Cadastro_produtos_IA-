@@ -12,6 +12,21 @@ import google.generativeai as genai
 
 
 
+class ProdutoViewSet(viewsets.ModelViewSet):
+    queryset = Produto.objects.all()
+    serializer_class = ProdutoSerializer
+    permission_classes = [IsAuthenticated]
+
+    # Personalizando a resposta do GET por ID
+    def retrieve(self, request, pk=None):
+        produto = get_object_or_404(Produto, pk=pk)
+        serializer = self.get_serializer(produto)
+        return Response({
+            "mensagem": f"Detalhes do produto {produto.nome}",
+            "dados": serializer.data
+        })
+
+
 @api_view(['GET'])
 def get_product(request):
 
