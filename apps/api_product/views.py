@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Product
-from .models import Produto
 from .serializers import ProductSerializer
+from rest_framework.permissions import IsAuthenticated
 import json
 import os
 import google.generativeai as genai
@@ -13,16 +14,16 @@ import google.generativeai as genai
 
 
 class ProdutoViewSet(viewsets.ModelViewSet):
-    queryset = Produto.objects.all()
-    serializer_class = ProdutoSerializer
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
 
     # Personalizando a resposta do GET por ID
     def retrieve(self, request, pk=None):
-        produto = get_object_or_404(Produto, pk=pk)
+        produto = get_object_or_404(Product, pk=pk)
         serializer = self.get_serializer(produto)
         return Response({
-            "mensagem": f"Detalhes do produto {produto.nome}",
+            "mensagem": f"Detalhes do produto {product.nome}",
             "dados": serializer.data
         })
 
@@ -42,6 +43,7 @@ def get_product(request):
 def post_product(request):
     
     if request.method == 'POST':
+        nome_produto = request.GET.get('produto')
         new_product = request.data
         serializer = ProductSerializer(data = new_product)
         p = Produto()
@@ -49,7 +51,7 @@ def post_product(request):
         genai.configure(api_key=os.getenv('API_KEY'))
         model = genai.GenerativeModel("gemini-1.5-flash",generation_config={"response_mime_type": "application/json"})
 
-        response = model.generate_content("Preciso da descrição completa para cadastro de "+request.GET.get('produto')+".  with this schema:")
+        response = model.generate_content("Preciso da descrição completa para cadastro de "+nome_produto+".  with this schema:")
 
         print(p)
         return Response(response.text, status=status.HTTP_200_OK)
