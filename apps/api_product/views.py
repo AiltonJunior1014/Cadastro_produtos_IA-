@@ -45,15 +45,42 @@ def post_product(request):
     if request.method == 'POST':
         nome_produto = request.GET.get('produto')
         new_product = request.data
-        serializer = ProductSerializer(data = new_product)
-        p = Produto()
-        
+        # serializer = ProductSerializer(data = new_product)
+
+        prompt = f"""Preciso dos seguintes dados para cadastro do produto "+nome_produto+".  with this schema:
+        {{
+            "code": "...",
+            "name": "...",
+            "shortDescription": "...",
+            "description": "...",
+            "price": ...,
+            "promotionalPrice": ...,
+            "packagingQuantity": ...,
+            "stock": ...,
+            "stockFake": 1000,
+            "minimumStock": ..,
+            "unit": "...",
+            "weight": ...,
+            "height": ...,
+            "width": ...,
+            "length": ...,
+            "brand": "...",
+            "modifield": "...",
+            "status": ...,
+            "ean": ...,
+            "partCode": "...",
+            "ncm": "...",
+            "crossDocking": ...,
+            "images": ...,
+        }}
+        """
+
         genai.configure(api_key=os.getenv('API_KEY'))
         model = genai.GenerativeModel("gemini-1.5-flash",generation_config={"response_mime_type": "application/json"})
 
-        response = model.generate_content("Preciso da descrição completa para cadastro de "+nome_produto+".  with this schema:")
+        response = model.generate_content(prompt)
 
-        print(p)
+        print(response)
         return Response(response.text, status=status.HTTP_200_OK)
     
         
