@@ -47,7 +47,7 @@ def post_product(request):
         new_product = request.data
         # serializer = ProductSerializer(data = new_product)
 
-        prompt = f"""Preciso dos seguintes dados para cadastro do produto "+nome_produto+".  with this schema:
+        prompt = f"""Preciso dos seguintes dados para cadastro do produto """+nome_produto+""".  with this schema:
         {{
             "code": "...",
             "name": "...",
