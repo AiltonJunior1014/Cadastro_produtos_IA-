@@ -47,36 +47,48 @@ def post_product(request):
         new_product = request.data
         # serializer = ProductSerializer(data = new_product)
 
-        prompt = f"""Preciso dos seguintes dados para cadastro do produto "+nome_produto+".  with this schema:
-        {{
-            "code": "...",
-            "name": "...",
-            "shortDescription": "...",
-            "description": "...",
-            "price": ...,
-            "promotionalPrice": ...,
-            "packagingQuantity": ...,
-            "stock": ...,
-            "stockFake": 1000,
-            "minimumStock": ..,
-            "unit": "...",
-            "weight": ...,
-            "height": ...,
-            "width": ...,
-            "length": ...,
-            "brand": "...",
-            "modifield": "...",
-            "status": ...,
-            "ean": ...,
-            "partCode": "...",
-            "ncm": "...",
-            "crossDocking": ...,
-            "images": ...,
-        }}
-        """
-
-        genai.configure(api_key=os.getenv('API_KEY'))
-        model = genai.GenerativeModel("gemini-1.5-flash",generation_config={"response_mime_type": "application/json"})
+        prompt = f"Preciso dos seguintes dados para cadastro do produto "+nome_produto
+        try:
+            genai.configure(api_key=os.getenv('API_KEY'))
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(
+                prompt,
+                generation_config={
+                    "response_mime_type": "application/json",
+                    "response_schema": {
+                        "type": "object",
+                        "properties": {
+                            "code": {"type": "string"},
+                            "name": {"type": "string"},
+                            "shortDescription": {"type": "string"},
+                            "description": {"type": "string"},
+                            "price": {"type": "number"},
+                            "promotionalPrice": {"type": "number"},
+                            "packagingQuantity": {"type": "integer"},
+                            "stock": {"type": "integer"},
+                            "stockFake": {"type": "integer"},
+                            "minimumStock": {"type": "integer"},
+                            "unit": {"type": "string"},
+                            "weight": {"type": "number"},
+                            "height": {"type": "number"},
+                            "width": {"type": "number"},
+                            "length": {"type": "number"},
+                            "brand": {"type": "string"},
+                            "modified": {"type": "string"},
+                            "status": {"type": "boolean"},
+                            "ean": {"type": "string"},
+                            "partCode": {"type": "string"},
+                            "ncm": {"type": "string"},
+                            "crossDocking": {"type": "boolean"},
+                            "images": {"type": "array", "items": {"type": "string"}},
+                        },
+                        "required": ["code", "name", "price", "stock", "unit", "brand", "status"],
+                    }
+                }
+            )
+            print(response.text)
+        except Exception as e:
+            print(f"Ocorreu um erro: {e}")
 
         response = model.generate_content(prompt)
 
