@@ -47,7 +47,32 @@ def post_product(request):
         new_product = request.data
         # serializer = ProductSerializer(data = new_product)
 
-        prompt = f"Preciso dos seguintes dados para cadastro do produto "+nome_produto
+        prompt = """Gere os dados para cadastrar o produto """+nome_produto+""" no formato JSON com as seguintes chaves:
+                - code
+                - name
+                - shortDescription
+                - description
+                - price
+                - promotionalPrice
+                - packagingQuantity
+                - stock
+                - stockFake
+                - minimumStock
+                - unit
+                - weight
+                - height
+                - width
+                - length
+                - brand
+                - modified
+                - status
+                - ean
+                - partCode
+                - ncm
+                - crossDocking
+                - images (lista de URLs)
+
+                Retorne APENAS o objeto JSON."""
         try:
             genai.configure(api_key=os.getenv('API_KEY'))
             model = genai.GenerativeModel("gemini-1.5-flash")
