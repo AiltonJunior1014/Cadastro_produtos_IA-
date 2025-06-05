@@ -8,6 +8,7 @@ from .models import Product
 from .serializers import ProductSerializer
 from rest_framework.permissions import IsAuthenticated
 import json
+import re
 import os
 import google.generativeai as genai
 
@@ -77,48 +78,23 @@ def post_product(request):
             genai.configure(api_key=os.getenv('API_KEY'))
             model = genai.GenerativeModel("gemini-1.5-flash")
             response = model.generate_content(
-                prompt,
-                generation_config={
-                    "response_mime_type": "application/json",
-                    "response_schema": {
-                        "type": "object",
-                        "properties": {
-                            "code": {"type": "string"},
-                            "name": {"type": "string"},
-                            "shortDescription": {"type": "string"},
-                            "description": {"type": "string"},
-                            "price": {"type": "number"},
-                            "promotionalPrice": {"type": "number"},
-                            "packagingQuantity": {"type": "integer"},
-                            "stock": {"type": "integer"},
-                            "stockFake": {"type": "integer"},
-                            "minimumStock": {"type": "integer"},
-                            "unit": {"type": "string"},
-                            "weight": {"type": "number"},
-                            "height": {"type": "number"},
-                            "width": {"type": "number"},
-                            "length": {"type": "number"},
-                            "brand": {"type": "string"},
-                            "modified": {"type": "string"},
-                            "status": {"type": "boolean"},
-                            "ean": {"type": "string"},
-                            "partCode": {"type": "string"},
-                            "ncm": {"type": "string"},
-                            "crossDocking": {"type": "boolean"},
-                            "images": {"type": "array", "items": {"type": "string"}},
-                        },
-                        "required": ["code", "name", "price", "stock", "unit", "brand", "status"],
-                    }
-                }
+                prompt
             )
-            print(response.text)
+            resposta = response.candidates[0].content.parts[0].text
+
+            # Extrai apenas o JSON com regex
+            match = re.search(r'{.*}', resposta, re.DOTALL)
+            if match:
+                clean_json = match.group(0)
+                data = json.loads(clean_json)
+                print(data["name"])  # Exemplo: Coca-Cola 2 Litros
+            
         except Exception as e:
             print(f"Ocorreu um erro: {e}")
 
-        response = model.generate_content(prompt)
 
-        print(response)
-        return Response(response.text, status=status.HTTP_200_OK)
+        # print(response)
+        return Response(data, status=status.HTTP_200_OK)
     
         
     return Response(status=status.HTTP_400_BAD_REQUEST)
