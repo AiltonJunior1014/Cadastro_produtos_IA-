@@ -1,4 +1,8 @@
 from django.db import models
+from serializers import MongoDBHandler
+
+import os
+import datetime
 
 class Product(models.Model):
     product_code = models.CharField(max_length=100, primary_key=True, default='')
@@ -13,7 +17,7 @@ class Product(models.Model):
 # Create your models here.
 
 
-class Product(models.Model):
+class Produto(models.Model):
     def __init__(self):
         self._code = None
         self._name = None
@@ -38,6 +42,17 @@ class Product(models.Model):
         self._ncm = None
         self._crossDocking = None
 
+    def to_dict(self):
+        data = self.__dict__.copy()
+        return data
+
+
+    def salva_produto(self):
+        mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+        db_name = os.getenv('MONGO_DB_NAME', 'mydatabase')
+        handler = MongoDBHandler(mongo_uri, db_name)
+        return handler.save_produto(self)
+    
     # Getters and Setters
     def get_code(self): return self._code
     def set_code(self, value): self._code = value

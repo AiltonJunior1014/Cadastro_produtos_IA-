@@ -14,7 +14,7 @@
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ProdutoViewSet, get_product, post_product
+from .views import ProdutoViewSet, get_product, post_product, post_product_image
 #, buscar_por_nome
 
 router = DefaultRouter()
@@ -25,5 +25,6 @@ urlpatterns = [
     path('listar/', get_product, name='product-list'),
     #path('produto/add/', post_product, name='product-add'),
     path('buscar/', post_product, name='buscar-produto'),
+    path('buscarImagem/', post_product_image, name='buscar-produto'),
 ]
 
