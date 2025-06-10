@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from models import Produto
+from .models import Produto
 
 
 class MongoDBHandler:

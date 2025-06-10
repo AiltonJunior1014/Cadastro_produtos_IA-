@@ -5,7 +5,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Product, Produto
-from .serializers import ProductSerializer
+from .serializers import  MongoDBHandler
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from PIL import Image
@@ -22,7 +22,7 @@ import google.generativeai as genai
 
 class ProdutoViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    serializer_class = MongoDBHandler
     permission_classes = [IsAuthenticated]
 
     # Personalizando a resposta do GET por ID
@@ -55,8 +55,8 @@ def getToken():
                 headers=headers,
                 data=payload
             )
-            os.getenv('TOKEN_API') = token.json().get("access_token")
-            os.getenv('DATA_TOKEN') = datetime.datetime.now().strftime("%Y-%m-%d")
+            os.environ['TOKEN_API'] = token.json().get("access_token")
+            os.environ['DATA_TOKEN'] = datetime.datetime.now().strftime("%Y-%m-%d")
             return os.getenv('TOKEN_API')
         except Exception as e:
             print(f"Erro ao obter token: {e}")
@@ -87,6 +87,12 @@ def criaProduto(dados):
     produto.set_ncm(dados.get('ncm', ''))
     produto.set_crossDocking(dados.get('crossDocking', ''))
     return produto
+
+def salva_produto(produto):
+        mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+        db_name = os.getenv('MONGO_DB_NAME', 'mydatabase')
+        handler = MongoDBHandler(mongo_uri, db_name)
+        return handler.save_produto(produto)
 
 def enviaProduto(produto_dict):
     json_data = json.dumps(produto_dict, indent=4, ensure_ascii=False)
@@ -155,7 +161,7 @@ def post_product(request):
                 clean_json = match.group(0)
                 data = json.loads(clean_json)
                 produto = criaProduto(data)
-                produto.salva_produto()
+                salva_produto(produto)
                 produto_dict = produto.to_dict()
                 enviaProduto(produto_dict)
                 
@@ -223,7 +229,7 @@ def post_product_image(request):
                 clean_json = match.group(0)
                 data = json.loads(clean_json)
                 produto = criaProduto(data)
-                produto.salva_produto()
+                salva_produto(produto)
                 produto_dict = produto.to_dict()
                 enviaProduto(produto_dict)
                 

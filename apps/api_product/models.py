@@ -1,5 +1,4 @@
 from django.db import models
-from serializers import MongoDBHandler
 
 import os
 import datetime
@@ -47,11 +46,7 @@ class Produto(models.Model):
         return data
 
 
-    def salva_produto(self):
-        mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
-        db_name = os.getenv('MONGO_DB_NAME', 'mydatabase')
-        handler = MongoDBHandler(mongo_uri, db_name)
-        return handler.save_produto(self)
+    
     
     # Getters and Setters
     def get_code(self): return self._code
