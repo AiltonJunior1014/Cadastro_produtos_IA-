@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from PIL import Image
 from datetime import datetime,timedelta
+from dotenv import load_dotenv
 import json
 import io
 import re
@@ -18,7 +19,7 @@ import uuid
 import requests
 import google.generativeai as genai
 
-
+load_dotenv(override=True) 
 
 class ProdutoViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
@@ -35,10 +36,10 @@ class ProdutoViewSet(viewsets.ModelViewSet):
         })
 
 def getToken():
-    hoje = datetime.datetime.now("%Y-%m-%d")
-    diferenca = datetime.strptime(os.getenv('DATA_TOKEN'), "%Y-%m-%d") - hoje
+    hoje = datetime.now().date()
+    diferenca = datetime.strptime(os.getenv('DATA_TOKEN'), "%Y-%m-%d").date() - hoje
 
-    if diferenca.years < 1:
+    if diferenca.days < 365:
         return os.getenv('TOKEN_API')
     else:
         try:
@@ -50,13 +51,13 @@ def getToken():
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
-            token = requests.get(
+            token = requests.post(
                 os.getenv('API_BRING')+'v1/auth',
                 headers=headers,
                 data=payload
             )
             os.environ['TOKEN_API'] = token.json().get("access_token")
-            os.environ['DATA_TOKEN'] = datetime.datetime.now().strftime("%Y-%m-%d")
+            os.environ['DATA_TOKEN'] = datetime.now().strftime("%Y-%m-%d")
             return os.getenv('TOKEN_API')
         except Exception as e:
             print(f"Erro ao obter token: {e}")
@@ -80,7 +81,7 @@ def criaProduto(dados):
     produto.set_width(dados.get('width', ''))
     produto.set_length(dados.get('length', ''))
     produto.set_brand(dados.get('brand', ''))
-    produto.set_modified(dados.get('modified', ''))
+    produto.set_modified(datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"))  
     produto.set_status(dados.get('status', ''))
     produto.set_ean(dados.get('ean', ''))
     produto.set_partCode(dados.get('partCode', ''))
@@ -104,23 +105,31 @@ def enviaProduto(produto_dict):
     }
     requests.request(
         "PUT",
-        os.getenv('API_BRING')+'v1/products/sku/'+data["sku"],
+        os.getenv('API_BRING')+'v1/products',
         headers=headers,
         data=json_data
-                )
+        )
 
 @api_view(['GET'])
 def get_product(request):
     if request.method == 'GET':
-        product = Product.objects.all()
-        serializer = ProductSerializer(product, many=True)
-        return Response(serializer.data)
+        data_inicio = request.GET.get('data_inicio')
+        data_fim = request.GET.get('data_fim')
+        mongo_uri = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+        db_name = os.getenv('MONGO_DB_NAME', 'mydatabase')
+        handler = MongoDBHandler(mongo_uri, db_name)
+        lista_produtos = handler.buscar_produtos_por_periodo(data_inicio, data_fim)
+        print(f"Lista de produtos: {lista_produtos}")
+        if lista_produtos:
+            return Response(lista_produtos, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "Nenhum produto encontrado."}, status=status.HTTP_404_NOT_FOUND)
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def post_product(request):
     if request.method == 'POST':
-        nome_produto = request.GET.get('produto')
+        nome_produto = request.data.get('produto')
         new_product = request.data
         # serializer = ProductSerializer(data = new_product)
         prompt = """Gere os dados para cadastrar o produto """+nome_produto+""" no formato JSON com as seguintes chaves:
@@ -170,7 +179,6 @@ def post_product(request):
         # print(response)
         return Response(data, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(['POST'])
 def post_product_image(request):
@@ -231,9 +239,9 @@ def post_product_image(request):
                 produto = criaProduto(data)
                 salva_produto(produto)
                 produto_dict = produto.to_dict()
-                enviaProduto(produto_dict)
-                
-            return Response({data["name"]}, status=status.HTTP_200_OK)
+                enviaProduto(produto_dict)  
+
+            return Response(data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"erro": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return Response({"erro": "Nenhuma imagem enviada."}, status=status.HTTP_400_BAD_REQUEST)

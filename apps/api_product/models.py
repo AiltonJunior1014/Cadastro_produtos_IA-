@@ -18,7 +18,7 @@ class Product(models.Model):
 
 class Produto(models.Model):
     def __init__(self):
-        self._code = None
+        self._code = ''
         self._name = None
         self._shortDescription = None
         self._description = None
@@ -42,8 +42,30 @@ class Produto(models.Model):
         self._crossDocking = None
 
     def to_dict(self):
-        data = self.__dict__.copy()
-        return data
+        return {
+        'code': self._code,
+        'name': self._name,
+        'shortDescription': self._shortDescription,
+        'description': self._description,
+        'price': self._price,
+        'promotionalPrice': self._promotionalPrice,
+        'packagingQuantity': self._packagingQuantity,
+        'stock': self._stock,
+        'stockFake': self._stockFake,
+        'minimumStock': self._minimumStock,
+        'unit': self._unit,
+        'weight': self._weight,
+        'height': self._height,
+        'width': self._width,
+        'length': self._length,
+        'brand': self._brand,
+        'modified': self._modified,
+        'status': self._status,
+        'ean': self._ean,
+        'partCode': self._partCode,
+        'ncm': self._ncm,
+        'crossDocking': self._crossDocking
+        }
 
 
     

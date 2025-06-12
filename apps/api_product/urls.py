@@ -23,7 +23,6 @@ router.register(r'produtos', ProdutoViewSet, basename='produto')
 urlpatterns = [
     path('', include(router.urls)),
     path('listar/', get_product, name='product-list'),
-    #path('produto/add/', post_product, name='product-add'),
     path('buscar/', post_product, name='buscar-produto'),
     path('buscarImagem/', post_product_image, name='buscar-produto'),
 ]
